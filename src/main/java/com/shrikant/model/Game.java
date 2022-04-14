@@ -2,14 +2,27 @@ package com.shrikant.model;
 
 import java.util.UUID;
 
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import javax.persistence.OneToOne;
+
+import org.hibernate.annotations.GenericGenerator;
+
 import com.shrikant.enums.Result;
 import com.shrikant.enums.State;
 
+@Entity
 public class Game {
 	
+	@Id
+	@GenericGenerator(name = "uuid", strategy = "org.hibernate.id.UUIDGenerator")
+	@GeneratedValue(generator = "uuid")
 	private UUID gameId;
 	private State state;
+	@OneToOne(mappedBy = "game")
 	private Player player1;
+	@OneToOne(mappedBy = "game")
 	private Player player2;
 	
 	public Game(State state) {

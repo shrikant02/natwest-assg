@@ -1,5 +1,7 @@
 package com.shrikant.model;
 
+import javax.persistence.OneToOne;
+
 import com.shrikant.enums.Move;
 import com.shrikant.enums.Result;
 
@@ -8,6 +10,9 @@ public class Player {
 	private String name;
 	private Move move;
 	private Result result;
+	
+	@OneToOne
+	private Game game;
 	
 	public Player(String name) {
 		this.name = name;
