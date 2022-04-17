@@ -2,13 +2,13 @@ package com.shrikant.model;
 
 import java.util.Map;
 import java.util.UUID;
+
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-
 import org.hibernate.annotations.GenericGenerator;
-
 import com.shrikant.enums.Result;
 import com.shrikant.enums.State;
 
@@ -21,7 +21,7 @@ public class Game {
 	private UUID gameId;
 	private State state;
 	
-	@OneToMany(mappedBy = "game")
+	@ElementCollection
 	private Map<String,Player> players;
 	
 	public Game(State state) {
