@@ -55,7 +55,9 @@ public class GameController {
 	/* controller for making the move */
 	@PostMapping("/api/games/{id}/move")
 	public ResponseEntity<String> makeMove(@PathVariable UUID id, @RequestBody Map<String, String> body) {
-		if (game.getGameId().toString().equals(id.toString())) {
+		System.out.println(game.getGameId());
+		System.out.print(id);
+		if (!game.getGameId().toString().equals(id.toString())) {
 
 			if (game.getPlayers().get("player1").equals(body.get("name"))) {
 				game.getPlayers().get("player1").setMove(Move.valueOf(body.get("move")));
