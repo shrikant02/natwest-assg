@@ -1,6 +1,8 @@
 package com.shrikant.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -24,8 +26,8 @@ public class GameController {
 
 	@Autowired
 	private GameRepository gameRepository;
-	
-	private Map<String,Player> players = new HashMap<>();
+
+	private List<Player> players = new ArrayList<>();
 
 	Game game;
 
@@ -34,7 +36,7 @@ public class GameController {
 	public ResponseEntity<String> newGame(@RequestBody Map<String, String> body) {
 		Player player1 = new Player(body.get("name"));
 		game = new Game(State.STARTED);
-		players.put("player1", player1);
+		players.add(player1);
 		gameRepository.save(game);
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body("Player 1 joined: " + player1.getName() + " " + "Game id : " + game.getGameId());
@@ -44,8 +46,8 @@ public class GameController {
 	@PostMapping("/api/games/{id}/join")
 	public ResponseEntity<String> joinGame(@PathVariable UUID id, @RequestBody Map<String, String> body) {
 		Player player2 = new Player(body.get("name"));
-		if(players.size() <= 2) {
-			players.put("player2", player2);
+		if (players.size() <= 2) {
+			players.add(player2);
 		}
 		game.setPlayers(players);
 		gameRepository.save(game);
@@ -55,30 +57,35 @@ public class GameController {
 	/* controller for making the move */
 	@PostMapping("/api/games/{id}/move")
 	public ResponseEntity<String> makeMove(@PathVariable UUID id, @RequestBody Map<String, String> body) {
-		System.out.println(game.getGameId());
-		System.out.print(id);
-		if (!game.getGameId().toString().equals(id.toString())) {
+		boolean isPlayerFound = false;
+		if (game.getGameId().equals(id.toString())) {
+			List<Player> players = game.getPlayers();
 
-			if (game.getPlayers().get("player1").equals(body.get("name"))) {
-				game.getPlayers().get("player1").setMove(Move.valueOf(body.get("move")));
-				return ResponseEntity.status(HttpStatus.OK).body("Player :" + body.get("name") + " has made the move");
-			} else if (game.getPlayers().get("player2").equals(body.get("name"))) {
-				game.getPlayers().get("player2").setMove(Move.valueOf(body.get("move")));
-				return ResponseEntity.status(HttpStatus.OK).body("Player :" + body.get("name") + " has made the move");
+			for (Player player : players) {
+				if (player.getName().equals(body.get("name"))) {
+					player.setMove(Move.valueOf(body.get("move")));
+					isPlayerFound = true;
+				}
 			}
 		}
-		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Player not found");
+		if (isPlayerFound) {
+			return ResponseEntity.status(HttpStatus.OK).body("Player :" + body.get("name") + " has made the move");
+		} else {
+			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Player not found");
+		}
 	}
 
 	/* controller for checking the state */
 	@GetMapping("/api/games/{id}")
 	public ResponseEntity<String> checkState(@PathVariable UUID id) {
-
-		if (!game.getGameId().equals(id.toString())) {
+		/*if (game.getGameId().equals(id.toString())) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Game Id was not found");
-		}
-        game.evaluateMove(game.getPlayers().get("player1"), game.getPlayers().get("player2"));
-        return ResponseEntity.status(HttpStatus.OK).body(game.toString());
-	}
+		} */
+		System.out.print(game.getPlayers().get(0).getName());
+		System.out.print(game.getPlayers().get(1).getName());
 
+		game.evaluateMove(game.getPlayers().get(0), game.getPlayers().get(1));
+		return ResponseEntity.status(HttpStatus.OK).body(game.toString());
+
+	}
 }

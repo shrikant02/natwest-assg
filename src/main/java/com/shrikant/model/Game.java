@@ -1,16 +1,13 @@
 package com.shrikant.model;
 
-import java.util.Map;
+
+import java.util.List;
 import java.util.UUID;
 
 import javax.persistence.CascadeType;
-import javax.persistence.CollectionTable;
-import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import org.hibernate.annotations.GenericGenerator;
 import com.shrikant.enums.Result;
@@ -22,11 +19,11 @@ public class Game {
 	@Id
 	@GenericGenerator(name = "uuid", strategy = "org.hibernate.id.UUIDGenerator")
 	@GeneratedValue(generator = "uuid")
-	private UUID gameId;
+	private String gameId;
 	private State state;
 	
     @OneToMany(mappedBy = "game", cascade = CascadeType.ALL)
-	private Map<String,Player> players;
+	private List<Player> players;
     
 	public Game() {
 	}
@@ -36,15 +33,18 @@ public class Game {
 		this.state = state;
 	}
 	
-	public UUID generateId() {
-		return UUID.randomUUID();
+	public String generateId() {
+		return UUID.randomUUID().toString();
 	}
-	public UUID getGameId() {
+	
+	public String getGameId() {
 		return gameId;
 	}
-	public void setGameId(UUID gameId) {
+
+	public void setGameId(String gameId) {
 		this.gameId = gameId;
 	}
+
 	public State getState() {
 		return state;
 	}
@@ -53,17 +53,25 @@ public class Game {
 	}
 	
 	
-	public Map<String, Player> getPlayers() {
+
+	public List<Player> getPlayers() {
 		return players;
 	}
 
-	public void setPlayers(Map<String, Player> players) {
+	public void setPlayers(List<Player> players) {
 		this.players = players;
 	}
 
 	@Override
 	public String toString() {
-		return "Game [gameId=" + gameId + ", state=" + state + ", players=" + players + "]";
+
+        return "GameId: " + gameId +
+                "\nGame state: " + state +
+                "\nPlayer 1: " + this.players.get(0).getName() +
+                "\nPlayer 1 move: " + this.players.get(0).getMove() +
+                "\nPlayer 2: " + this.players.get(1).getName() +
+                "\nPlayer 2 move: " + this.players.get(1).getMove() +
+                "\nRESULT: " + "Player 1 - " + this.players.get(0).getResult() + ", Player 2 - " + this.players.get(1).getResult() + "\n";
 	}
 
 	public void evaluateMove(Player player1, Player player2) {
