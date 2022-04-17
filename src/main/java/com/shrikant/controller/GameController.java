@@ -1,5 +1,6 @@
 package com.shrikant.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,6 +24,8 @@ public class GameController {
 
 	@Autowired
 	private GameRepository gameRepository;
+	
+	private Map<String,Player> players = new HashMap<>();
 
 	Game game;
 
@@ -31,7 +34,7 @@ public class GameController {
 	public ResponseEntity<String> newGame(@RequestBody Map<String, String> body) {
 		Player player1 = new Player(body.get("name"));
 		game = new Game(State.STARTED);
-		game.setPlayer1(player1);
+		players.put("player1", player1);
 		gameRepository.save(game);
 		return ResponseEntity.status(HttpStatus.CREATED)
 				.body("Player 1 joined: " + player1.getName() + " " + "Game id : " + game.getGameId());
@@ -41,7 +44,10 @@ public class GameController {
 	@PostMapping("/api/games/{id}/join")
 	public ResponseEntity<String> joinGame(@PathVariable UUID id, @RequestBody Map<String, String> body) {
 		Player player2 = new Player(body.get("name"));
-		game.setPlayer2(player2);
+		if(players.size() <= 2) {
+			players.put("player2", player2);
+		}
+		game.setPlayers(players);
 		gameRepository.save(game);
 		return ResponseEntity.status(HttpStatus.OK).body("Player 2 joined:" + player2.getName());
 	}
@@ -51,11 +57,11 @@ public class GameController {
 	public ResponseEntity<String> makeMove(@PathVariable UUID id, @RequestBody Map<String, String> body) {
 		if (game.getGameId().toString().equals(id.toString())) {
 
-			if (game.getPlayer1().getName().equals(body.get("name"))) {
-				game.getPlayer1().setMove(Move.valueOf(body.get("move")));
+			if (game.getPlayers().get("player1").equals(body.get("name"))) {
+				game.getPlayers().get("player1").setMove(Move.valueOf(body.get("move")));
 				return ResponseEntity.status(HttpStatus.OK).body("Player :" + body.get("name") + " has made the move");
-			} else if (game.getPlayer2().getName().equals(body.get("name"))) {
-				game.getPlayer2().setMove(Move.valueOf(body.get("move")));
+			} else if (game.getPlayers().get("player2").equals(body.get("name"))) {
+				game.getPlayers().get("player2").setMove(Move.valueOf(body.get("move")));
 				return ResponseEntity.status(HttpStatus.OK).body("Player :" + body.get("name") + " has made the move");
 			}
 		}
@@ -69,10 +75,8 @@ public class GameController {
 		if (!game.getGameId().equals(id.toString())) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Game Id was not found");
 		}
-
-		game.evaluateMove(game.getPlayer1(), game.getPlayer2());
-
-		return ResponseEntity.status(HttpStatus.OK).body(game.toString());
+        game.evaluateMove(game.getPlayers().get("player1"), game.getPlayers().get("player2"));
+        return ResponseEntity.status(HttpStatus.OK).body(game.toString());
 	}
 
 }
